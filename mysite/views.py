@@ -6,12 +6,13 @@ def new(request):
     return render(request, 'index.html')
 
 def analyzed(request):
-    djtext = request.GET.get('text', 'Default')
-    value = request.GET.get('removepunc', 'off')
-    charcount = request.GET.get('charcount', 'off')
-    capitalize = request.GET.get("capital", 'off')
-    newlineremover = request.GET.get('lineremove', 'off')
-    spaceremover = request.GET.get('spaceremover', 'off')
+    global params, analyzed, count
+    djtext = request.POST.get('text', 'Default')
+    value = request.POST.get('removepunc', 'off')
+    charcount = request.POST.get('charcount', 'off')
+    capitalize = request.POST.get("capital", 'off')
+    newlineremover = request.POST.get('lineremove', 'off')
+    spaceremover = request.POST.get('spaceremover', 'off')
     count = 0
     if value == 'on':
         punctuations = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
@@ -20,43 +21,47 @@ def analyzed(request):
             if char not in punctuations:
                 analyzed = analyzed + char
         params = {'analyzed_text': analyzed}
-        return render(request, 'analyze.html', params)
+        djtext = analyzed
 
-    elif(charcount == 'on'):
+    if(charcount == 'on'):
         for char in djtext:
             if char == ' ':
                 pass
             else:
                 count += 1
         params = {'analyzed_text': count, 'texting': 'Characters in your text is '}
-        return render(request, 'analyze.html', params)
+        djtext = analyzed
 
-    elif(capitalize == 'on'):
+    if(capitalize == 'on'):
         analyzed = ''
         for char in djtext:
             analyzed = analyzed + char.upper()
         params = {'analyzed_text': analyzed}
-        return render(request, 'analyze.html', params)
+        djtext = analyzed
 
-    elif (newlineremover == 'on'):
+    if (newlineremover == 'on'):
         analyzed = ''
         for char in djtext:
-            if char !='\n':
+            if char !='\n' and char !="\r":
                 analyzed = analyzed + char
         params = {'analyzed_text': analyzed}
-        return render(request, 'analyze.html', params)
+        djtext = analyzed
 
-    elif (spaceremover == 'on'):
+    if (spaceremover == 'on'):
         analyzed = ''
         for char in djtext:
             if char !=' ':
                 analyzed = analyzed + char
         params = {'analyzed_text': analyzed}
-        return render(request, 'analyze.html', params)
+        djtext = analyzed
 
-    else:
-        return HttpResponse("Error")
+    if(spaceremover !="on" and newlineremover !="on" and capitalize != 'on' and charcount != 'on' and value != 'on'):
+        return HttpResponse("Error!! You haven't choose any function, Try again!")
 
+    if(djtext == ''):
+        return HttpResponse("Error!, You haven't enter any text...")
+
+    return render(request, 'analyze.html', params)
 def aboutus(request):
     return render(request, 'aboutus.html')
 
